@@ -137,7 +137,7 @@ static Variant HHVM_FUNCTION(shp_create, const String& filename, int64_t shape_t
   return Resource(shph_res);
 }
 
-static bool HHVM_FUNCTION(shp_close, CResRef shp) {
+static bool HHVM_FUNCTION(shp_close, const Resource& shp) {
   SHPHandle shph;
   CHECK_HANDLE(shp, SHPHandle, shph, false);
   // the following is not done by PECL shape ext, but we will be incompatible here,
@@ -146,7 +146,7 @@ static bool HHVM_FUNCTION(shp_close, CResRef shp) {
   return true;
 }
 
-static Variant HHVM_FUNCTION(shp_read_object, CResRef shp, int64_t ord) {
+static Variant HHVM_FUNCTION(shp_read_object, const Resource& shp, int64_t ord) {
   SHPHandle shph;
   CHECK_HANDLE(shp, SHPHandle, shph, false);
 
@@ -160,7 +160,7 @@ static Variant HHVM_FUNCTION(shp_read_object, CResRef shp, int64_t ord) {
   return Resource(shp_obj_res);
 }
 
-static bool HHVM_FUNCTION(shp_destroy_object, CResRef shp_object) {
+static bool HHVM_FUNCTION(shp_destroy_object, const Resource& shp_object) {
   SHPObject* shp_obj;
   CHECK_HANDLE(shp_object, SHPObject, shp_obj, false);
   // the following is not done by PECL shape ext, but we will be incompatible here,
@@ -169,7 +169,7 @@ static bool HHVM_FUNCTION(shp_destroy_object, CResRef shp_object) {
   return true;
 }
 
-static bool HHVM_FUNCTION(shp_rewind_object, CResRef shp_handle, CResRef shp_object) {
+static bool HHVM_FUNCTION(shp_rewind_object, const Resource& shp_handle, const Resource& shp_object) {
   SHPHandle shph;
   CHECK_HANDLE(shp_handle, SHPHandle, shph, false);
   SHPObject* shp_obj;
@@ -177,7 +177,7 @@ static bool HHVM_FUNCTION(shp_rewind_object, CResRef shp_handle, CResRef shp_obj
   return SHPRewindObject(shph, shp_obj);
 }
 
-static Variant HHVM_FUNCTION(shp_write_object, CResRef shp_handle, int64_t entity_num, CResRef shp_object) {
+static Variant HHVM_FUNCTION(shp_write_object, const Resource& shp_handle, int64_t entity_num, const Resource& shp_object) {
   SHPHandle shph;
   CHECK_HANDLE(shp_handle, SHPHandle, shph, false);
   SHPObject* shp_obj;
@@ -185,7 +185,7 @@ static Variant HHVM_FUNCTION(shp_write_object, CResRef shp_handle, int64_t entit
   return Variant(SHPWriteObject(shph, entity_num, shp_obj));
 }
 
-static Variant HHVM_FUNCTION(shp_get_info, CResRef shp_handle) {
+static Variant HHVM_FUNCTION(shp_get_info, const Resource& shp_handle) {
   SHPHandle shph;
   CHECK_HANDLE(shp_handle, SHPHandle, shph, false);
 
@@ -206,7 +206,7 @@ static Variant HHVM_FUNCTION(shp_get_info, CResRef shp_handle) {
   return Variant(return_value);
 }
 
-static bool HHVM_FUNCTION(shp_compute_extents, CResRef shp_object) {
+static bool HHVM_FUNCTION(shp_compute_extents, const Resource& shp_object) {
   SHPObject* shp_obj;
   CHECK_HANDLE(shp_object, SHPObject, shp_obj, false);
 
@@ -214,7 +214,7 @@ static bool HHVM_FUNCTION(shp_compute_extents, CResRef shp_object) {
   return true;
 }
 
-static Variant HHVM_FUNCTION(shp_create_object_impl, CArrRef args) {
+static Variant HHVM_FUNCTION(shp_create_object_impl, const Array& args) {
   if (args.size() < 10) {
     return Variant(false);
   }
@@ -306,7 +306,7 @@ static Variant HHVM_FUNCTION(shp_create_object_impl, CArrRef args) {
 
 static Variant HHVM_FUNCTION(shp_create_simple_object,
   int64_t shp_type, int64_t vertices_num,
-  CArrRef padfX, CArrRef padfY, CArrRef padfZ
+  const Array& padfX, const Array& padfY, const Array& padfZ
 ) {
   if (padfX.size() != padfY.size()) {
     raise_warning("padfX and padfY have different number of elements");
@@ -359,7 +359,7 @@ static Variant HHVM_FUNCTION(shp_create_simple_object,
   return Resource(shp_obj_res);
 }
 
-static Variant HHVM_FUNCTION(shp_get_array_from_object, CResRef shp_object) {
+static Variant HHVM_FUNCTION(shp_get_array_from_object, const Resource& shp_object) {
   SHPObject* shp_obj;
   CHECK_HANDLE(shp_object, SHPObject, shp_obj, false);
 
