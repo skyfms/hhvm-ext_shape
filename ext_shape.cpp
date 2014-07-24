@@ -380,7 +380,8 @@ static Variant HHVM_FUNCTION(shp_get_array_from_object, CResRef shp_object) {
 
 class shpExtension: public Extension {
 public:
-  shpExtension(): Extension("shp") { /* nothing */ }
+  // 0.9.2-dev is PECL extension version we ported.
+  shpExtension(): Extension("shp", "0.9.2-dev") { /* nothing */ }
   virtual void moduleInit() {
     Native::registerConstant<KindOfInt64>(s_SHPT_NULL.get(), k_SHPT_NULL);
     Native::registerConstant<KindOfInt64>(s_SHPT_POINT.get(), k_SHPT_POINT);
