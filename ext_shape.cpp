@@ -105,6 +105,13 @@ StaticString SHPObjectRes::s_class_name("SHPObject");
     shp = **(r_ ## shp); \
   }
 
+// Handle differences between pre-3.5.0 and later HHVM versions.
+#ifdef NEWOBJ
+    #define NEWRES(x) NEWOBJ(x)
+#else
+    #define NEWRES(x) newres<x>
+#endif
+
 static Variant HHVM_FUNCTION(shp_open, const String& filename, const String& access) {
   SHPHandle shph = SHPOpen(filename.c_str(), access.c_str());
 
@@ -112,7 +119,7 @@ static Variant HHVM_FUNCTION(shp_open, const String& filename, const String& acc
     return null_variant;
   }
 
-  SHPHandleRes* shph_res = NEWOBJ(SHPHandleRes)(shph);
+  SHPHandleRes* shph_res = NEWRES(SHPHandleRes)(shph);
   return Resource(shph_res);
 }
 
@@ -133,7 +140,7 @@ static Variant HHVM_FUNCTION(shp_create, const String& filename, int64_t shape_t
     return null_variant;
   }
 
-  SHPHandleRes* shph_res = NEWOBJ(SHPHandleRes)(shph);
+  SHPHandleRes* shph_res = NEWRES(SHPHandleRes)(shph);
   return Resource(shph_res);
 }
 
@@ -156,7 +163,7 @@ static Variant HHVM_FUNCTION(shp_read_object, const Resource& shp, int64_t ord) 
     return null_variant;
   }
 
-  SHPObjectRes* shp_obj_res = NEWOBJ(SHPObjectRes)(shp_obj);
+  SHPObjectRes* shp_obj_res = NEWRES(SHPObjectRes)(shp_obj);
   return Resource(shp_obj_res);
 }
 
@@ -300,7 +307,7 @@ static Variant HHVM_FUNCTION(shp_create_object_impl, const Array& args) {
     return Variant(false);
   }
 
-  SHPObjectRes* shp_obj_res = NEWOBJ(SHPObjectRes)(shp_obj);
+  SHPObjectRes* shp_obj_res = NEWRES(SHPObjectRes)(shp_obj);
   return Resource(shp_obj_res);
 }
 
@@ -355,7 +362,7 @@ static Variant HHVM_FUNCTION(shp_create_simple_object,
     return Variant(false);
   }
 
-  SHPObjectRes* shp_obj_res = NEWOBJ(SHPObjectRes)(shp_obj);
+  SHPObjectRes* shp_obj_res = NEWRES(SHPObjectRes)(shp_obj);
   return Resource(shp_obj_res);
 }
 
@@ -382,7 +389,7 @@ class shpExtension: public Extension {
 public:
   // 0.9.2-dev is PECL extension version we ported.
   shpExtension(): Extension("shp", "0.9.2-dev") { /* nothing */ }
-  virtual void moduleInit() {
+  virtual void moduleInit() override {
     Native::registerConstant<KindOfInt64>(s_SHPT_NULL.get(), k_SHPT_NULL);
     Native::registerConstant<KindOfInt64>(s_SHPT_POINT.get(), k_SHPT_POINT);
     Native::registerConstant<KindOfInt64>(s_SHPT_ARC.get(), k_SHPT_ARC);
@@ -415,7 +422,6 @@ public:
     HHVM_FE(shp_create_object_impl);
     HHVM_FE(shp_create_simple_object);
     HHVM_FE(shp_get_array_from_object);
-
     loadSystemlib();
   }
 } s_shp_extension;
