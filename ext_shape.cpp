@@ -23,7 +23,9 @@
    Extended and ported to HHVM by Kristaps Kaupe.
 */
 
-#include "hphp/runtime/base/base-includes.h"
+#include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/resource-data.h"
 #include <cinttypes>
 #include <libshp/shapefil.h>
 
@@ -97,20 +99,13 @@ public:
 StaticString SHPObjectRes::s_class_name("SHPObject");
 
 #define CHECK_HANDLE(handle, type, shp, ret) \
-  type ## Res * r_ ## shp = handle.getTyped<type ## Res>(true, true); \
-  if (r_ ## shp == nullptr) { \
+  req::ptr<type ## Res> r_ ## shp = cast<type ## Res>(handle); \
+  if (! r_ ## shp) { \
     raise_warning("Got NULL for resource"); \
     return (ret); \
   } else { \
-    shp = **(r_ ## shp); \
+    shp = **r_ ## shp.get(); \
   }
-
-// Handle differences between pre-3.5.0 and later HHVM versions.
-#ifdef NEWOBJ
-    #define NEWRES(x) NEWOBJ(x)
-#else
-    #define NEWRES(x) newres<x>
-#endif
 
 static Variant HHVM_FUNCTION(shp_open, const String& filename, const String& access) {
   SHPHandle shph = SHPOpen(filename.c_str(), access.c_str());
@@ -119,7 +114,7 @@ static Variant HHVM_FUNCTION(shp_open, const String& filename, const String& acc
     return null_variant;
   }
 
-  SHPHandleRes* shph_res = NEWRES(SHPHandleRes)(shph);
+  SHPHandleRes* shph_res = req::make<SHPHandleRes>(shph).detach();
   return Resource(shph_res);
 }
 
@@ -140,7 +135,7 @@ static Variant HHVM_FUNCTION(shp_create, const String& filename, int64_t shape_t
     return null_variant;
   }
 
-  SHPHandleRes* shph_res = NEWRES(SHPHandleRes)(shph);
+  SHPHandleRes* shph_res = req::make<SHPHandleRes>(shph).detach();
   return Resource(shph_res);
 }
 
@@ -163,7 +158,7 @@ static Variant HHVM_FUNCTION(shp_read_object, const Resource& shp, int64_t ord) 
     return null_variant;
   }
 
-  SHPObjectRes* shp_obj_res = NEWRES(SHPObjectRes)(shp_obj);
+  SHPObjectRes* shp_obj_res = req::make<SHPObjectRes>(shp_obj).detach();
   return Resource(shp_obj_res);
 }
 
@@ -307,7 +302,7 @@ static Variant HHVM_FUNCTION(shp_create_object_impl, const Array& args) {
     return Variant(false);
   }
 
-  SHPObjectRes* shp_obj_res = NEWRES(SHPObjectRes)(shp_obj);
+  SHPObjectRes* shp_obj_res = req::make<SHPObjectRes>(shp_obj).detach();
   return Resource(shp_obj_res);
 }
 
@@ -362,7 +357,7 @@ static Variant HHVM_FUNCTION(shp_create_simple_object,
     return Variant(false);
   }
 
-  SHPObjectRes* shp_obj_res = NEWRES(SHPObjectRes)(shp_obj);
+  SHPObjectRes* shp_obj_res = req::make<SHPObjectRes>(shp_obj).detach();
   return Resource(shp_obj_res);
 }
 

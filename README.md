@@ -14,14 +14,10 @@ in `sci-libs/shapelib` ebuild.
 
 ### Building & Installation
 
-Installation currently requires a copy of HHVM (version 2.3 or later) to be
-built from source on the local machine (not installed from your distribution's
-packages, even currently available Gentoo ebuilds will not work), instructions
-on how to do this are available on the [HipHop Wiki][fb-wiki]. Once done, the
-following command will build the extension.
+Installation requires HHVM version 3.10.0 or later. For older HHVM versions
+check "hhvm-pre-3.10" branch.
 
 ~~~
-$ export HPHP_HOME=/path/to/hhvm
 $ cd /path/to/extension
 $ ./build.sh
 ~~~
@@ -29,13 +25,11 @@ $ ./build.sh
 This will produce a `shp.so` file, the dynamically-loadable extension.
 
 To enable the extension, you need to have the following section in your HHVM
-config file:
+config file (php.ini style config):
 
 ~~~
-DynamicExtensionPath = /path/to/hhvm/extensions
-DynamicExtensions {
-        * = shp.so
-}
+hhvm.dynamic_extension_path = /path/to/hhvm/extensions
+hhvm.dynamic_extensions[dbase] = dbase.so
 ~~~
 
 Where `/path/to/hhvm/extensions` is a folder containing all HipHop extensions,
