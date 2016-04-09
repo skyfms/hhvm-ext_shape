@@ -98,14 +98,39 @@ public:
 
 StaticString SHPObjectRes::s_class_name("SHPObject");
 
-#define CHECK_HANDLE(handle, type, shp, ret) \
-  req::ptr<type ## Res> r_ ## shp = cast<type ## Res>(handle); \
-  if (! r_ ## shp) { \
-    raise_warning("Got NULL for resource"); \
-    return (ret); \
-  } else { \
-    shp = **r_ ## shp.get(); \
-  }
+#if (HHVM_VERSION_BRANCH >= ((3 << 16) | (10 << 8)))
+
+  #define CHECK_HANDLE(handle, type, shp, ret) \
+    req::ptr<type ## Res> r_ ## shp = cast<type ## Res>(handle); \
+    if (! r_ ## shp) { \
+      raise_warning("Got NULL for resource"); \
+      return (ret); \
+    } else { \
+      shp = **r_ ## shp.get(); \
+    }
+
+  #define NEWRES(x) req::make<x>
+  #define DETACH .detach()
+
+#else
+
+  #define CHECK_HANDLE(handle, type, shp, ret) \
+    type ## Res * r_ ## shp = handle.getTyped<type ## Res>(true, true); \
+    if (r_ ## shp == nullptr) { \
+      raise_warning("Got NULL for resource"); \
+      return (ret); \
+    } else { \
+      shp = **(r_ ## shp); \
+    }
+
+  #ifdef NEWOBJ
+    #define NEWRES(x) NEWOBJ(x)
+  #else
+    #define NEWRES(x) newres<x>
+  #endif
+  #define DETACH
+
+#endif
 
 static Variant HHVM_FUNCTION(shp_open, const String& filename, const String& access) {
   SHPHandle shph = SHPOpen(filename.c_str(), access.c_str());
@@ -114,7 +139,7 @@ static Variant HHVM_FUNCTION(shp_open, const String& filename, const String& acc
     return null_variant;
   }
 
-  SHPHandleRes* shph_res = req::make<SHPHandleRes>(shph).detach();
+  SHPHandleRes* shph_res = NEWRES(SHPHandleRes)(shph) DETACH;
   return Resource(shph_res);
 }
 
@@ -135,7 +160,7 @@ static Variant HHVM_FUNCTION(shp_create, const String& filename, int64_t shape_t
     return null_variant;
   }
 
-  SHPHandleRes* shph_res = req::make<SHPHandleRes>(shph).detach();
+  SHPHandleRes* shph_res = NEWRES(SHPHandleRes)(shph) DETACH;
   return Resource(shph_res);
 }
 
@@ -158,7 +183,7 @@ static Variant HHVM_FUNCTION(shp_read_object, const Resource& shp, int64_t ord) 
     return null_variant;
   }
 
-  SHPObjectRes* shp_obj_res = req::make<SHPObjectRes>(shp_obj).detach();
+  SHPObjectRes* shp_obj_res = NEWRES(SHPObjectRes)(shp_obj) DETACH;
   return Resource(shp_obj_res);
 }
 
@@ -302,7 +327,7 @@ static Variant HHVM_FUNCTION(shp_create_object_impl, const Array& args) {
     return Variant(false);
   }
 
-  SHPObjectRes* shp_obj_res = req::make<SHPObjectRes>(shp_obj).detach();
+  SHPObjectRes* shp_obj_res = NEWRES(SHPObjectRes)(shp_obj) DETACH;
   return Resource(shp_obj_res);
 }
 
@@ -357,7 +382,7 @@ static Variant HHVM_FUNCTION(shp_create_simple_object,
     return Variant(false);
   }
 
-  SHPObjectRes* shp_obj_res = req::make<SHPObjectRes>(shp_obj).detach();
+  SHPObjectRes* shp_obj_res = NEWRES(SHPObjectRes)(shp_obj) DETACH;
   return Resource(shp_obj_res);
 }
 

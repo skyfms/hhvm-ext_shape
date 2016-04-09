@@ -14,8 +14,7 @@ in `sci-libs/shapelib` ebuild.
 
 ### Building & Installation
 
-Installation requires HHVM version 3.10.0 or later. For older HHVM versions
-check "hhvm-pre-3.10" branch.
+Installation requires HHVM version 3.2.0 or later.
 
 ~~~
 $ cd /path/to/extension
