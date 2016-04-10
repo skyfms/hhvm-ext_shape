@@ -30,7 +30,7 @@ config file (php.ini style config):
 
 ~~~
 hhvm.dynamic_extension_path = /path/to/hhvm/extensions
-hhvm.dynamic_extensions[dbase] = dbase.so
+hhvm.dynamic_extensions[shp] = shp.so
 ~~~
 
 Where `/path/to/hhvm/extensions` is a folder containing all HipHop extensions,
