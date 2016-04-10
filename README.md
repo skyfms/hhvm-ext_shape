@@ -14,7 +14,9 @@ in `sci-libs/shapelib` ebuild.
 
 ### Building & Installation
 
-Installation requires HHVM version 3.2.0 or later.
+Installation requires HHVM version 3.2.0 or later. On Gentoo systems with 
+[our overlay](https://github.com/skyfms/portage-overlay) you can just 
+`emerge dev-php/hhvm-ext_shape`. On other systems:
 
 ~~~
 $ cd /path/to/extension
