@@ -165,11 +165,10 @@ static Variant HHVM_FUNCTION(shp_create, const String& filename, int64_t shape_t
 }
 
 static bool HHVM_FUNCTION(shp_close, const Resource& shp) {
-  SHPHandle shph;
-  CHECK_HANDLE(shp, SHPHandle, shph, false);
-  // the following is not done by PECL shape ext, but we will be incompatible here,
-  // because we don't want memory leaks.
-  SHPClose(shph);
+  // We can have invalid pointer here. Better leak memory than crash.
+  //SHPHandle shph;
+  //CHECK_HANDLE(shp, SHPHandle, shph, false);
+  //SHPClose(shph);
   return true;
 }
 
@@ -188,11 +187,10 @@ static Variant HHVM_FUNCTION(shp_read_object, const Resource& shp, int64_t ord) 
 }
 
 static bool HHVM_FUNCTION(shp_destroy_object, const Resource& shp_object) {
-  SHPObject* shp_obj;
-  CHECK_HANDLE(shp_object, SHPObject, shp_obj, false);
-  // the following is not done by PECL shape ext, but we will be incompatible here,
-  // because we don't want memory leaks.
-  SHPDestroyObject(shp_obj);
+  // We can have invalid pointer here. Better leak memory than crash.
+  //SHPObject* shp_obj;
+  //CHECK_HANDLE(shp_object, SHPObject, shp_obj, false);
+  //SHPDestroyObject(shp_obj);
   return true;
 }
 
@@ -209,6 +207,21 @@ static Variant HHVM_FUNCTION(shp_write_object, const Resource& shp_handle, int64
   CHECK_HANDLE(shp_handle, SHPHandle, shph, false);
   SHPObject* shp_obj;
   CHECK_HANDLE(shp_object, SHPObject, shp_obj, false);
+  
+  // Do the same checks as asserts in SHPWriteObject()
+  if (shp_obj->nSHPType != shph->nShapeType && shp_obj->nSHPType != SHPT_NULL) {
+    raise_warning(
+      "Shape object does not match the type of the file it is being written to"
+    );
+    return Variant(false);
+  }
+  if (entity_num != -1 && entity_num >= shph->nRecords) {
+    raise_warning(
+      "shp_write_object() expects entity_num -1 for appends, forcing"
+    );
+    entity_num = -1;
+  }
+  
   return Variant(SHPWriteObject(shph, entity_num, shp_obj));
 }
 
