@@ -1,6 +1,6 @@
  /*
    ESRI Shapefile extension for HHVM.
-   Copyright (c) 2013 SIA Intelligent Systems.
+   Copyright (c) 2013-2016 SIA Intelligent Systems.
    
    Based on PECL shape extension with the following copyright:
 
