@@ -3,7 +3,7 @@
 /*** Standard functions from PECL shape extension */
 
 <<__Native>> function shp_open (string $filename, string $access): mixed;
-<<__Native>> function shp_create (string $filename, string $access): mixed;
+<<__Native>> function shp_create (string $filename, int $shp_type): mixed;
 <<__Native>> function shp_close (resource $shp): bool;
 <<__Native>> function shp_read_object (resource $shp, int $ord): mixed;
 <<__Native>> function shp_destroy_object (resource $shp_object): bool;
