@@ -76,6 +76,7 @@ class SHPHandleRes : public SweepableResourceData {
 public:
   explicit SHPHandleRes(SHPHandle handle) : shp_handle(handle) { };
   SHPHandle operator* () const { return shp_handle; };
+  virtual void sweep() { delete this; }
 
   static StaticString s_class_name;
   virtual const String& o_getClassNameHook() const { return s_class_name; }
@@ -89,6 +90,7 @@ class SHPObjectRes : public SweepableResourceData {
 public:
   explicit SHPObjectRes(SHPObject* object) : shp_object(object) { };
   SHPObject* operator* () const { return shp_object; };
+  virtual void sweep() { delete this; }
 
   static StaticString s_class_name;
   virtual const String& o_getClassNameHook() const { return s_class_name; }
@@ -136,7 +138,7 @@ static Variant HHVM_FUNCTION(shp_open, const String& filename, const String& acc
   SHPHandle shph = SHPOpen(filename.c_str(), access.c_str());
 
   if (!shph) {
-    return null_variant;
+    return Variant(Variant::NullInit{});
   }
 
   SHPHandleRes* shph_res = NEWRES(SHPHandleRes)(shph) DETACH;
@@ -157,7 +159,7 @@ static Variant HHVM_FUNCTION(shp_create, const String& filename, int64_t shape_t
   SHPHandle shph = SHPCreate(filename.c_str(), shape_type);
 
   if (!shph) {
-    return null_variant;
+    return Variant(Variant::NullInit{});
   }
 
   SHPHandleRes* shph_res = NEWRES(SHPHandleRes)(shph) DETACH;
@@ -179,7 +181,7 @@ static Variant HHVM_FUNCTION(shp_read_object, const Resource& shp, int64_t ord) 
   SHPObject* shp_obj = SHPReadObject(shph, ord);
   if (!shp_obj) {
     raise_warning("Reading of object %d failed", (int)ord);
-    return null_variant;
+    return Variant(Variant::NullInit{});
   }
 
   SHPObjectRes* shp_obj_res = NEWRES(SHPObjectRes)(shp_obj) DETACH;
