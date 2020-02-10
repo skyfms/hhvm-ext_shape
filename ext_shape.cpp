@@ -1,6 +1,6 @@
  /*
    ESRI Shapefile extension for HHVM.
-   Copyright (c) 2013-2016 SIA Intelligent Systems.
+   Copyright (c) 2013-2020 SIA Intelligent Systems.
    
    Based on PECL shape extension with the following copyright:
 
@@ -23,6 +23,7 @@
    Extended and ported to HHVM by Kristaps Kaupe.
 */
 
+#include "hphp/runtime/version.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/resource-data.h"
@@ -30,6 +31,13 @@
 #include <libshp/shapefil.h>
 
 namespace HPHP {
+
+// HPHP::Array::add() was removed in HHVM 3.29, should use set() instead
+#if defined HHVM_VERSION_BRANCH && HHVM_VERSION_BRANCH >= 0x031D00
+  #define ARRAY_ADD(arr,key,value) arr.set(key, Variant(value))
+#else
+  #define ARRAY_ADD(arr,key,value) arr.add(key, Variant(value))
+#endif
 
 const StaticString s_SHPT_NULL("SHPT_NULL");
 const int64_t k_SHPT_NULL = SHPT_NULL;
@@ -237,14 +245,14 @@ static Variant HHVM_FUNCTION(shp_get_info, const Resource& shp_handle) {
   Array min_bound = Array::Create();
   Array max_bound = Array::Create();
   for (int i = 0; i < 4; i++) {
-    min_bound.add(i, Variant(min_b[i]));
-    max_bound.add(i, Variant(max_b[i]));
+    ARRAY_ADD(min_bound, i, min_b[i]);
+    ARRAY_ADD(min_bound, i, max_b[i]);
   }
   Array return_value = Array::Create();
-  return_value.add(String("pnEntities"), Variant(ent_n));
-  return_value.add(String("pnShapetype"), Variant(shp_type));
-  return_value.add(String("padfMinBound"), Variant(min_bound));
-  return_value.add(String("padfMaxBound"), Variant(max_bound));
+  ARRAY_ADD(return_value, String("pnEntities"), ent_n);
+  ARRAY_ADD(return_value, String("pnShapetype"), shp_type);
+  ARRAY_ADD(return_value, String("padfMinBound"), min_bound);
+  ARRAY_ADD(return_value, String("padfMaxBound"), max_bound);
   return Variant(return_value);
 }
 
@@ -406,15 +414,15 @@ static Variant HHVM_FUNCTION(shp_get_array_from_object, const Resource& shp_obje
   CHECK_HANDLE(shp_object, SHPObject, shp_obj, false);
 
   Array return_value = Array::Create();
-  return_value.add(String("nVertices"), Variant(shp_obj->nVertices));
+  ARRAY_ADD(return_value, String("nVertices"), shp_obj->nVertices);
   Array pointX_arr = Array::Create();
   Array pointY_arr = Array::Create();
   for (int i = 0; i < shp_obj->nVertices; i++) {
-    pointX_arr.add(i, Variant(shp_obj->padfX[i]));
-    pointY_arr.add(i, Variant(shp_obj->padfY[i]));
+    ARRAY_ADD(pointX_arr, i, shp_obj->padfX[i]);
+    ARRAY_ADD(pointY_arr, i, shp_obj->padfY[i]);
   }
-  return_value.add(String("padfX"), Variant(pointX_arr));
-  return_value.add(String("padfY"), Variant(pointY_arr));
+  ARRAY_ADD(return_value, String("padfX"), pointX_arr);
+  ARRAY_ADD(return_value, String("padfY"), pointY_arr);
   return Variant(return_value);
 }
 
